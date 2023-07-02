@@ -10,9 +10,9 @@
       "request": "launch",
       "preLaunchTask": "build",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/src/UPV.Web/bin/Debug/net7.0/UPV.Web.dll",
+      "program": "${workspaceFolder}/src/DDD.Web/bin/Debug/net7.0/DDD.Web.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/src/UPV.Web",
+      "cwd": "${workspaceFolder}/src/DDD.Web",
       "stopAtEntry": false,
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
