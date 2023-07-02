@@ -24,7 +24,7 @@ namespace DDD.Web.Controllers
 
     [HttpGet]
     [Route("")]
-    public IActionResult GetAll()
+    public virtual IActionResult GetAll()
     {
       try
       {
@@ -39,7 +39,7 @@ namespace DDD.Web.Controllers
 
     [HttpGet]
     [Route("{id:int}")]
-    public IActionResult GetById(int id)
+    public virtual IActionResult GetById(int id)
     {
       try
       {
@@ -58,7 +58,7 @@ namespace DDD.Web.Controllers
 
     [HttpPost]
     [Route("")]
-    public IActionResult Insert([FromBody] TPostDTO dto)
+    public virtual IActionResult Insert([FromBody] TPostDTO dto)
     {
       try
       {
@@ -72,7 +72,7 @@ namespace DDD.Web.Controllers
 
     [HttpPut]
     [Route("")]
-    public IActionResult Update([FromBody] TPutDTO dto)
+    public virtual IActionResult Update([FromBody] TPutDTO dto)
     {
       try
       {
@@ -87,7 +87,7 @@ namespace DDD.Web.Controllers
 
     [HttpDelete]
     [Route("{id:int}")]
-    public IActionResult Delete(int id)
+    public virtual IActionResult Delete(int id)
     {
       try
       {
