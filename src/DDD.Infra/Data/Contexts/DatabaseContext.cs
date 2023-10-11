@@ -9,7 +9,7 @@ namespace DDD.Infra.Data.Contexts
   {
     public DbSet<User>? Users { get; set; }
 
-    public IDbContextTransaction? transaction { get; private set; }
+    public IDbContextTransaction? Transaction { get; private set; }
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
@@ -24,16 +24,16 @@ namespace DDD.Infra.Data.Contexts
 
     public IDbContextTransaction BeginTransaction()
     {
-      if (transaction == null)
-        transaction = this.Database.BeginTransaction();
+      if (Transaction == null)
+        Transaction = this.Database.BeginTransaction();
 
-      return transaction;
+      return Transaction;
     }
 
     private void _Rollback()
     {
-      if (transaction != null)
-        transaction.Rollback();
+      if (Transaction != null)
+        Transaction.Rollback();
     }
 
     private void _SaveChanges()
@@ -52,11 +52,11 @@ namespace DDD.Infra.Data.Contexts
 
     private void _Commit()
     {
-      if (transaction != null)
+      if (Transaction != null)
       {
-        transaction.Commit();
-        transaction.Dispose();
-        transaction = null;
+        Transaction.Commit();
+        Transaction.Dispose();
+        Transaction = null;
       }
     }
 
