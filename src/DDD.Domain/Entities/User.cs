@@ -1,3 +1,5 @@
+using DDD.Domain.Entities.Base;
+
 namespace DDD.Domain.Entities
 {
   public class User : BaseEntity

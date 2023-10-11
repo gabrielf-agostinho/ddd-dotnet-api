@@ -1,4 +1,4 @@
-namespace DDD.Domain.Entities
+namespace DDD.Domain.Entities.Base
 {
   public class BaseEntity
   {
