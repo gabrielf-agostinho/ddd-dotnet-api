@@ -1,3 +1,5 @@
+using DDD.Application.DTOs.Base;
+
 namespace DDD.Application.DTOs.User
 {
   public class UserGetDTO : BaseDTO

@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace DDD.Application.Services
+namespace DDD.Application.Utils
 {
-  public static class HashGeneratorAppService
+  public static class HashGenerator
   {
     public static string GenerateHash(string text)
     {

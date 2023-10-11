@@ -1,4 +1,4 @@
-using DDD.Application.Services;
+using DDD.Application.Utils;
 
 namespace DDD.Application.DTOs.Auth
 {
@@ -13,7 +13,7 @@ namespace DDD.Application.DTOs.Auth
       }
       set 
       {
-        _password = HashGeneratorAppService.GenerateHash(value!);
+        _password = HashGenerator.GenerateHash(value!);
       }
     }
   }
