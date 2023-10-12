@@ -84,9 +84,9 @@ namespace DDD.Infra.Data.Repositories.Base
     public int Insert(TEntity entity)
     {
       databaseContext.BeginTransaction();
-      var id = databaseContext.Set<TEntity>().Add(entity).Entity.Id;
+      databaseContext.Set<TEntity>().Add(entity);
       databaseContext.SendChanges();
-      return (int)id!;
+      return entity.Id!;
     }
 
     public void Update(TEntity entity)

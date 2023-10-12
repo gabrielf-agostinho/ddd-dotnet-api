@@ -62,7 +62,7 @@ namespace DDD.Web.Controllers.Base
     {
       try
       {
-        return Ok(app.Insert(dto));
+        return Ok(new { Id = app.Insert(dto) });
       }
       catch (Exception e)
       {
@@ -91,6 +91,11 @@ namespace DDD.Web.Controllers.Base
     {
       try
       {
+        TGetDTO item = app.GetById(id);
+
+        if (item is null)
+          return NotFound();
+          
         app.Delete(id);
         return Ok();
       }
