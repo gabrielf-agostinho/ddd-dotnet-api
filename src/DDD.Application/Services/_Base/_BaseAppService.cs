@@ -55,7 +55,9 @@ namespace DDD.Application.Services.Base
         return;
 
       TEntity entity = service.GetById((int)dto.Id!);
-      service.Update(IMapper.Map(dto, entity));
+
+      if (entity is not null)
+        service.Update(IMapper.Map(dto, entity));
     }
 
     public virtual void Delete(int id)
