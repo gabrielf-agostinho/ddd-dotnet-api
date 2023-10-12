@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DDD.Domain.Entities;
+using DDD.Domain.Entities.Base;
 
-namespace DDD.Infra.Data.Mappings
+namespace DDD.Infra.Data.Mappings.Base
 {
   public class BaseMap<T> : IEntityTypeConfiguration<T> where T : BaseEntity
   {

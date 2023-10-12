@@ -1,5 +1,6 @@
 using DDD.Domain.Entities;
 using DDD.Application.DTOs.User;
+using DDD.Application.Interfaces.Base;
 
 namespace DDD.Application.Interfaces
 {

@@ -1,4 +1,5 @@
 using DDD.Domain.Entities;
+using DDD.Domain.Interfaces.Services.Base;
 
 namespace DDD.Domain.Interfaces.Services
 {

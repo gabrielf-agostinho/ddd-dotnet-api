@@ -1,6 +1,7 @@
 using DDD.Domain.Entities;
 using DDD.Domain.Interfaces.Repositories;
 using DDD.Domain.Interfaces.Services;
+using DDD.Domain.Services.Base;
 
 namespace DDD.Domain.Services
 {

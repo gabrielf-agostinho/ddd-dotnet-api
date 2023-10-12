@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDD.Domain.Entities;
+using DDD.Infra.Data.Mappings.Base;
 
 namespace DDD.Infra.Data.Mappings
 {

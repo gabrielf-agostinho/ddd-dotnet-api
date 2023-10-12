@@ -6,13 +6,13 @@ using Microsoft.IdentityModel.Tokens;
 using DDD.Application.Interfaces;
 using DDD.Domain.Entities;
 
-namespace DDD.Application.Services
+namespace DDD.Application.Utils
 {
-  public class TokenGeneratorAppService : ITokenGeneratorApp
+  public class TokenGenerator : ITokenGenerator
   {
     private ITokenConfig _tokenConfig;
 
-    public TokenGeneratorAppService(ITokenConfig tokenConfig)
+    public TokenGenerator(ITokenConfig tokenConfig)
     {
       _tokenConfig = tokenConfig;
     }

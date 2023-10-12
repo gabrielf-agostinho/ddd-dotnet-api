@@ -3,6 +3,7 @@ using DDD.Domain.Entities;
 using DDD.Domain.Interfaces.Services;
 using DDD.Application.DTOs.User;
 using DDD.Application.Interfaces;
+using DDD.Application.Services.Base;
 
 namespace DDD.Application.Services
 {

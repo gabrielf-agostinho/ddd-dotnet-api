@@ -1,12 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using DDD.Application.Interfaces;
 using DDD.Application.Services;
-using DDD.Application.DTOs;
-using DDD.Domain.Entities;
 using DDD.Domain.Interfaces.Repositories;
 using DDD.Domain.Interfaces.Services;
 using DDD.Domain.Services;
 using DDD.Infra.Data.Repositories;
+using DDD.Application.Interfaces.Base;
+using DDD.Domain.Entities.Base;
+using DDD.Application.DTOs.Base;
+using DDD.Application.Services.Base;
+using DDD.Domain.Services.Base;
+using DDD.Domain.Interfaces.Services.Base;
+using DDD.Domain.Interfaces.Repositories.Base;
+using DDD.Infra.Data.Repositories.Base;
 
 namespace DDD.Infra.IoC
 {
