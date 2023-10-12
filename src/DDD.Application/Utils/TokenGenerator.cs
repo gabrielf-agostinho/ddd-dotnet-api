@@ -5,19 +5,89 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using DDD.Application.Interfaces;
 using DDD.Domain.Entities;
+using DDD.Application.DTOs.Token;
+using DDD.Application.Helpers.Exceptions.Token;
 
 namespace DDD.Application.Utils
 {
   public class TokenGenerator : ITokenGenerator
   {
-    private ITokenConfig _tokenConfig;
+    private readonly ITokenConfig _tokenConfig;
+    private readonly IUserApp _userAppService;
 
-    public TokenGenerator(ITokenConfig tokenConfig)
+    public TokenGenerator(IUserApp userApp, ITokenConfig tokenConfig)
     {
       _tokenConfig = tokenConfig;
+      _userAppService = userApp;
     }
 
-    public string GenerateRefreshToken()
+    public TokenDTO GetToken(User user)
+    {
+      var claims = _GenerateUserClaims(user);
+      var token = _GenerateToken(claims);
+      var refresh = _GenerateRefreshToken();
+
+      _UpdateUserRefreshTokenAndExpiration(user, refresh);
+
+      return _GetTokenDTO(token, refresh);
+    }
+
+    public TokenDTO RefreshToken(RefreshTokenDTO refreshTokenDTO)
+    {
+      var token = refreshTokenDTO.AccessToken;
+      var refresh = refreshTokenDTO.RefreshToken;
+      var principal = _GetClaimPrincipal(token!);
+
+      if (!int.TryParse(principal.Identity!.Name, out var userId))
+        throw new InvalidTokenException();
+
+      User? user = _userAppService?.GetUserEntityById(userId);
+
+      if (user is null || user.RefreshToken != refresh || user.ExpiresAt < DateTime.Now)
+        throw new ExpiredTokenException();
+
+      token = _GenerateToken(principal.Claims);
+      refresh = _GenerateRefreshToken();
+
+      _UpdateUserRefreshTokenAndExpiration(user, refresh);
+
+      return _GetTokenDTO(token, refresh);
+    }
+
+    public void RevokeToken(int userId)
+    {
+      var user = _userAppService.GetUserEntityById(userId);
+
+      if (user is not null)
+      {
+        user.RefreshToken = null;
+        user.ExpiresAt = null;
+
+        _userAppService.Update(user);
+      }
+    }
+
+    private void _UpdateUserRefreshTokenAndExpiration(User user, string? refreshToken)
+    {
+      user.RefreshToken = refreshToken;
+      user.ExpiresAt = DateTime.Now.AddDays(_tokenConfig.DaysToRefresh);
+
+      _userAppService.Update(user);
+    }
+
+    private TokenDTO _GetTokenDTO(string token, string refresh)
+    {
+      return new TokenDTO
+      {
+        Authenticated = true,
+        AccessToken = token,
+        RefreshToken = refresh,
+        CreatedAt = DateTime.Now,
+        ExpiresAt = DateTime.Now.AddMinutes(_tokenConfig.MinutesToExpire)
+      };
+    }
+
+    private string _GenerateRefreshToken()
     {
       var randomNumber = new byte[32];
 
@@ -28,7 +98,7 @@ namespace DDD.Application.Utils
       }
     }
 
-    public string GenerateToken(IEnumerable<Claim> claims)
+    private string _GenerateToken(IEnumerable<Claim> claims)
     {
       var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenConfig.Secret!));
       var credentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -44,7 +114,7 @@ namespace DDD.Application.Utils
       return new JwtSecurityTokenHandler().WriteToken(options);
     }
 
-    public ClaimsPrincipal GetClaimPrincipal(string expiredToken)
+    private ClaimsPrincipal _GetClaimPrincipal(string expiredToken)
     {
       var validationParameters = new TokenValidationParameters
       {
@@ -64,12 +134,12 @@ namespace DDD.Application.Utils
       var jwtSecurityToken = securityToken as JwtSecurityToken;
 
       if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCulture))
-        throw new SecurityTokenException("Token inválido");
+        throw new SecurityTokenException("Invalid Token");
 
       return principal;
     }
 
-    public List<Claim> GenerateUserClaims(User user)
+    private List<Claim> _GenerateUserClaims(User user)
     {
       return new List<Claim>
       {

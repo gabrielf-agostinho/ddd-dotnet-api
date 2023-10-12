@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DDD.Application.DTOs.Auth;
 using DDD.Application.DTOs.Token;
-using DDD.Infra.Data.Contexts;
-using DDD.Web.Configurations;
 using DDD.Application.Utils;
+using DDD.Application.Interfaces;
+using DDD.Web.Configurations;
 
 namespace DDD.Web.Controllers
 {
@@ -12,87 +12,48 @@ namespace DDD.Web.Controllers
   [Route("api/[controller]")]
   public class AuthController : Controller
   {
-    private readonly DatabaseContext _databaseContext;
-    private readonly TokenGenerator _tokenGenerator;
-    private readonly TokenConfig _tokenConfig;
+    private readonly IUserApp _userAppService;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(DatabaseContext databaseContext, TokenGenerator tokenGenerator, TokenConfig tokenConfig)
+    public AuthController(IUserApp userApp, IConfiguration configuration)
     {
-      _databaseContext = databaseContext;
-      _tokenGenerator = tokenGenerator;
-      _tokenConfig = tokenConfig;
+      _userAppService = userApp;
+      _configuration = configuration;
     }
 
     [HttpPost]
     [Route("")]
     public IActionResult Auth([FromBody] AuthDTO authDTO)
     {
-      var user = _databaseContext.Users!.FirstOrDefault(u => u.Email == authDTO.Email && u.Password == authDTO.Password);
-
-      if (user is null)
-        return Unauthorized();
-
-      var claims = _tokenGenerator.GenerateUserClaims(user);
-      var token = _tokenGenerator.GenerateToken(claims);
-      var refresh = _tokenGenerator.GenerateRefreshToken();
-
-      user.RefreshToken = refresh;
-      user.ExpiresAt = DateTime.Now.AddDays(_tokenConfig.DaysToRefresh);
-
-      _databaseContext.SaveChanges();
-
-      var createdAt = DateTime.Now;
-      var expiresAt = createdAt.AddMinutes(_tokenConfig.MinutesToExpire);
-
-      var tokenDTO = new TokenDTO
+      try
       {
-        Authenticated = true,
-        AccessToken = token,
-        RefreshToken = refresh,
-        CreatedAt = createdAt,
-        ExpiresAt = expiresAt
-      };
+        var user = _userAppService.Authenticate(authDTO);
 
-      return Ok(tokenDTO);
+        if (user is null)
+          return Unauthorized();
+
+        var _tokenGenerator = new TokenGenerator(_userAppService, _configuration.ReadTokenConfig());
+        return Ok(_tokenGenerator.GetToken(user));
+      }
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
     }
 
     [HttpPost]
     [Route("refresh")]
     public IActionResult Refresh([FromBody] RefreshTokenDTO refreshTokenDTO)
     {
-      var token = refreshTokenDTO.AccessToken;
-      var refresh = refreshTokenDTO.RefreshToken;
-      var principal = _tokenGenerator.GetClaimPrincipal(token!);
-
-      if (!int.TryParse(principal.Identity!.Name, out var userId))
-        return Unauthorized("Invalid token");
-
-      var user = _databaseContext.Users!.Find(userId);
-
-      if (user is null || user.RefreshToken != refresh || user.ExpiresAt < DateTime.Now)
-        return Unauthorized("Please perform a new authentication");
-
-      token = _tokenGenerator.GenerateToken(principal.Claims);
-      refresh = _tokenGenerator.GenerateRefreshToken();
-
-      user.RefreshToken = refresh;
-      user.ExpiresAt = DateTime.Now.AddDays(_tokenConfig.DaysToRefresh);
-
-      _databaseContext.SaveChanges();
-
-      var createdAt = DateTime.Now;
-      var expiresAt = createdAt.AddMinutes(_tokenConfig.MinutesToExpire);
-
-      var tokenDTO = new TokenDTO
+      try
       {
-        Authenticated = true,
-        AccessToken = token,
-        RefreshToken = refresh,
-        CreatedAt = createdAt,
-        ExpiresAt = expiresAt
-      };
-
-      return Ok(tokenDTO);
+        var _tokenGenerator = new TokenGenerator(_userAppService, _configuration.ReadTokenConfig());
+        return Ok(_tokenGenerator.RefreshToken(refreshTokenDTO));
+      }
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
     }
 
     [HttpPatch]
@@ -100,18 +61,20 @@ namespace DDD.Web.Controllers
     [Route("revoke")]
     public IActionResult Revoke()
     {
-      var userId = int.Parse(User.Identity!.Name!);
-      var usuario = _databaseContext.Users!.Find(userId);
-
-      if (usuario is not null)
+      try
       {
-        usuario.RefreshToken = null;
-        usuario.ExpiresAt = null;
+        var userId = int.Parse(User.Identity!.Name!);
 
-        _databaseContext.SaveChanges();
+        var _tokenGenerator = new TokenGenerator(_userAppService, _configuration.ReadTokenConfig());
+        
+        _tokenGenerator.RevokeToken(userId);
+
+        return Ok();
       }
-
-      return Ok();
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
     }
   }
 }

@@ -1,11 +1,12 @@
-using System.Security.Claims;
+using DDD.Application.DTOs.Token;
+using DDD.Domain.Entities;
 
 namespace DDD.Application.Interfaces
 {
   public interface ITokenGenerator
   {
-    string GenerateToken(IEnumerable<Claim> claims);
-    string GenerateRefreshToken();
-    ClaimsPrincipal GetClaimPrincipal(string expiredToken);
+    TokenDTO GetToken(User user);
+    TokenDTO RefreshToken(RefreshTokenDTO refreshTokenDTO);
+    void RevokeToken(int userId);
   }
 }

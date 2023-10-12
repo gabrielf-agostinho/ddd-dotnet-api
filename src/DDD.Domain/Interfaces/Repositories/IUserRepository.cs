@@ -5,6 +5,6 @@ namespace DDD.Domain.Interfaces.Repositories
 {
   public interface IUserRepository : IBaseRepository<User>
   {
-
+    User? Authenticate(string Email, string Password);
   }
 }
