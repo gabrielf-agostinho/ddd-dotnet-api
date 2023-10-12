@@ -24,5 +24,10 @@ namespace DDD.Infra.Data.Repositories
 
       return searchQuery;
     }
+
+    public User? Authenticate(string Email, string Password)
+    {
+      return databaseContext.Users!.FirstOrDefault(u => u.Email == Email && u.Password == Password);
+    }
   }
 }
