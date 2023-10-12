@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using DDD.Domain.Entities;
-using DDD.Application.DTOs;
-using DDD.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using DDD.Domain.Entities.Base;
+using DDD.Application.DTOs.Base;
+using DDD.Web.Helpers.Filters;
+using DDD.Application.Interfaces.Base;
 
-namespace DDD.Web.Controllers
+namespace DDD.Web.Controllers.Base
 {
   [Authorize]
   [Produces("application/json")]
@@ -24,12 +25,11 @@ namespace DDD.Web.Controllers
 
     [HttpGet]
     [Route("")]
-    public virtual IActionResult GetAll()
+    public virtual IActionResult GetAll([FromHeader] SearchFilter searchFilter)
     {
       try
       {
-        IEnumerable<TGetDTO> items = app.GetAll();
-        return Ok(items);
+        return Ok(app.GetAll(searchFilter.Paginate, searchFilter.Skip, searchFilter.Take, searchFilter.Interval));
       }
       catch (Exception e)
       {

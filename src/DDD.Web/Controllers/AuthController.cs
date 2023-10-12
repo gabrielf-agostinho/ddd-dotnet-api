@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DDD.Application.DTOs.Auth;
 using DDD.Application.DTOs.Token;
-using DDD.Application.Services;
 using DDD.Infra.Data.Contexts;
 using DDD.Web.Configurations;
+using DDD.Application.Utils;
 
 namespace DDD.Web.Controllers
 {
@@ -13,13 +13,13 @@ namespace DDD.Web.Controllers
   public class AuthController : Controller
   {
     private readonly DatabaseContext _databaseContext;
-    private readonly TokenGeneratorAppService _tokenGeneratorAppService;
+    private readonly TokenGenerator _tokenGenerator;
     private readonly TokenConfig _tokenConfig;
 
-    public AuthController(DatabaseContext databaseContext, TokenGeneratorAppService tokenGeneratorAppService, TokenConfig tokenConfig)
+    public AuthController(DatabaseContext databaseContext, TokenGenerator tokenGenerator, TokenConfig tokenConfig)
     {
       _databaseContext = databaseContext;
-      _tokenGeneratorAppService = tokenGeneratorAppService;
+      _tokenGenerator = tokenGenerator;
       _tokenConfig = tokenConfig;
     }
 
@@ -32,9 +32,9 @@ namespace DDD.Web.Controllers
       if (user is null)
         return Unauthorized();
 
-      var claims = _tokenGeneratorAppService.GenerateUserClaims(user);
-      var token = _tokenGeneratorAppService.GenerateToken(claims);
-      var refresh = _tokenGeneratorAppService.GenerateRefreshToken();
+      var claims = _tokenGenerator.GenerateUserClaims(user);
+      var token = _tokenGenerator.GenerateToken(claims);
+      var refresh = _tokenGenerator.GenerateRefreshToken();
 
       user.RefreshToken = refresh;
       user.ExpiresAt = DateTime.Now.AddDays(_tokenConfig.DaysToRefresh);
@@ -62,7 +62,7 @@ namespace DDD.Web.Controllers
     {
       var token = refreshTokenDTO.AccessToken;
       var refresh = refreshTokenDTO.RefreshToken;
-      var principal = _tokenGeneratorAppService.GetClaimPrincipal(token!);
+      var principal = _tokenGenerator.GetClaimPrincipal(token!);
 
       if (!int.TryParse(principal.Identity!.Name, out var userId))
         return Unauthorized("Invalid token");
@@ -72,8 +72,8 @@ namespace DDD.Web.Controllers
       if (user is null || user.RefreshToken != refresh || user.ExpiresAt < DateTime.Now)
         return Unauthorized("Please perform a new authentication");
 
-      token = _tokenGeneratorAppService.GenerateToken(principal.Claims);
-      refresh = _tokenGeneratorAppService.GenerateRefreshToken();
+      token = _tokenGenerator.GenerateToken(principal.Claims);
+      refresh = _tokenGenerator.GenerateRefreshToken();
 
       user.RefreshToken = refresh;
       user.ExpiresAt = DateTime.Now.AddDays(_tokenConfig.DaysToRefresh);

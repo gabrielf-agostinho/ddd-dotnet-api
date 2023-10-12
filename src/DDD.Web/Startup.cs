@@ -3,8 +3,8 @@ using DDD.Infra.Data.Contexts;
 using DDD.Infra.IoC;
 using DDD.Application;
 using DDD.Application.Interfaces;
-using DDD.Application.Services;
 using DDD.Web.Configurations;
+using DDD.Application.Utils;
 
 class Startup
 {
@@ -18,13 +18,13 @@ class Startup
   public void ConfigureServices(IServiceCollection services)
   {
     var tokenConfig = Configuration.ReadTokenConfig();
-    var tokenGeneratorAppService = new TokenGeneratorAppService(tokenConfig);
+    var tokenGeneratorAppService = new TokenGenerator(tokenConfig);
 
     services.AddControllers();
     services.AddDbContext<DatabaseContext>(db => db.UseNpgsql(Configuration.GetConnectionString("database")));
 
     services.AddTransient<ITokenConfig, TokenConfig>();
-    services.AddTransient<ITokenGeneratorApp, TokenGeneratorAppService>();
+    services.AddTransient<ITokenGenerator, TokenGenerator>();
     services.AddSingleton(tokenGeneratorAppService);
     services.AddSingleton(tokenConfig);
     services.ConfigureJWT(tokenConfig);

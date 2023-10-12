@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using DDD.Domain.Entities;
 using DDD.Application.DTOs.User;
 using DDD.Application.Interfaces;
+using DDD.Web.Controllers.Base;
 
 namespace DDD.Web.Controllers
 {
