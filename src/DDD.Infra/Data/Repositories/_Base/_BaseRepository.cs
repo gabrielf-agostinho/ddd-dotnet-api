@@ -20,68 +20,29 @@ namespace DDD.Infra.Data.Repositories.Base
       throw new NotImplementedException();
     }
 
-    private string _GetRelations()
-    {
-      var properties = typeof(TEntity).GetProperties().ToList();
-
-      var relations = "";
-      foreach (var property in properties)
-        if (property.PropertyType.IsSubclassOf(typeof(BaseEntity)))
-          relations += relations != "" ? $".{property.Name}" : $"{property.Name}";
-
-      return relations;
-    }
-
-    public IEnumerable<TEntity> GetAll()
+    public virtual IEnumerable<TEntity> GetAll()
     {
       var dbset = databaseContext.Set<TEntity>();
-
-      var relations = _GetRelations();
-
-      if (relations != "")
-      {
-        var query = dbset.Include(relations);
-        return query.ToList();
-      }
-      else
-        return dbset.ToList();
+      return dbset.ToList();
     }
 
-    public IEnumerable<TEntity> GetAll(int skip, int take, params object[] searchFilters)
+    public virtual IEnumerable<TEntity> GetAll(int skip, int take, params object[] searchFilters)
     {
       var dbset = databaseContext.Set<TEntity>().Skip(skip).Take(take).Where(Query(searchFilters)).OrderByDescending(x => x.Id);
-
-      var relations = _GetRelations();
-
-      if (relations != "")
-      {
-        var query = dbset.Include(relations);
-        return query.ToList();
-      }
-      else
-        return dbset.ToList();
+      return dbset.ToList();
     }
 
-    public int Count(params object[] searchFilters)
+    public virtual int Count(params object[] searchFilters)
     {
       return databaseContext.Set<TEntity>().Where(Query(searchFilters)).Count();
     }
 
-    public TEntity GetById(int id)
+    public virtual TEntity GetById(int id)
     {
-      var relations = _GetRelations();
-
-      if (relations != "")
-      {
-        var dbset = databaseContext.Set<TEntity>();
-        var query = dbset.Include(relations);
-        return query.FirstOrDefault(c => c.Id == id)!;
-      }
-      else
-        return databaseContext.Set<TEntity>().Find(id)!;
+      return databaseContext.Set<TEntity>().Find(id)!;
     }
 
-    public int Insert(TEntity entity)
+    public virtual int Insert(TEntity entity)
     {
       databaseContext.BeginTransaction();
       databaseContext.Set<TEntity>().Add(entity);
@@ -89,7 +50,7 @@ namespace DDD.Infra.Data.Repositories.Base
       return entity.Id!;
     }
 
-    public void Update(TEntity entity)
+    public virtual void Update(TEntity entity)
     {
       databaseContext.BeginTransaction();
       databaseContext.Set<TEntity>().Attach(entity);
@@ -97,7 +58,7 @@ namespace DDD.Infra.Data.Repositories.Base
       databaseContext.SendChanges();
     }
 
-    public void Delete(int id)
+    public virtual void Delete(int id)
     {
       var entity = GetById(id);
 
